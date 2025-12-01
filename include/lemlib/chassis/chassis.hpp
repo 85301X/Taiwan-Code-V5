@@ -319,16 +319,16 @@ struct MotionDecel {
 };
 
 struct MoveToPointParams {
-        /** whether the robot should move forwards or backwards. True by default */
-        bool forwards = true;
-        /** the maximum speed the robot can travel at. Value between 0-127. 127 by default */
-        float maxSpeed = 127;
-        /** the minimum speed the robot can travel at. If set to a non-zero value, the exit conditions will switch to
-         * less accurate but smoother ones. Value between 0-127. 0 by default */
-        float minSpeed = 0;
-        /** distance between the robot and target point where the movement will exit. Only has an effect if minSpeed is
-         * non-zero.*/
-        float earlyExitRange = 0;
+     bool forwards = true;
+
+    float maxSpeed = 127;
+    float minSpeed = 0;
+   
+    float earlyExitRange = 0;
+
+    // NEW:
+    float decelStartDist = 12;   // inches before target when decel begins
+    float decelFactor = 1.0;     // 1.0 = linear, <1 = softer, >1 = stronger
 };
 
 // default drive curve

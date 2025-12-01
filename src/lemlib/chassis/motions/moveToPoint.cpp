@@ -6,8 +6,6 @@
 #include "pros/misc.hpp"
 
 void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointParams params, bool async) {
-    MotionDecel decel;
-    
     params.earlyExitRange = fabs(params.earlyExitRange);
     this->requestMotionStart();
     // were all motions cancelled?
@@ -30,20 +28,15 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
     Pose lastPose = getPose();
     distTraveled = 0;
     Timer timer(timeout);
-    
     bool close = false;
     float prevLateralOut = 0; // previous lateral power
     float prevAngularOut = 0; // previous angular power
-    Pose lastPoseForVel = getPose(true,true);
-    float lastTime =0.0f;
     const int compState = pros::competition::get_status();
     std::optional<bool> prevSide = std::nullopt;
 
     // calculate target pose in standard form
     Pose target(x, y);
     target.theta = lastPose.angle(target);
-    float finalHeading = target.theta; // desired facing direction
-bool headingLocked = false;
 
     // main loop
     while (!timer.isDone() && ((!lateralSmallExit.getExit() && !lateralLargeExit.getExit()) || !close) &&
@@ -73,63 +66,42 @@ bool headingLocked = false;
         if (!sameSide && params.minSpeed != 0) break;
         prevSide = side;
 
-       
-        float currentTime = pros::millis() / 1000.0f;
+        // calculate error
+        const float adjustedRobotTheta = params.forwards ? pose.theta : pose.theta + M_PI;
+        const float angularError = angleError(adjustedRobotTheta, pose.angle(target));
+        float lateralError = pose.distance(target) * cos(angleError(pose.theta, pose.angle(target)));
 
-        // 2. Compute change
-        float dtVel = currentTime - lastTime;
-        float currentVel = 0.0f;
-        if (dtVel > 0) {
-            currentVel = pose.distance(lastPoseForVel) / dtVel; // units: distance per second
-        }
-        float slowdownFactor = 30.0f;
-        if (distTarget < decel.slowdownStart) {
-            slowdownFactor = std::pow(distTarget / decel.slowdownStart, decel.kDecel);
-            slowdownFactor = std::clamp(slowdownFactor, decel.minSpeed / decel.maxSpeed, 1.0f);
-            float maxSpeed = 40.0f; // adjust to your drivetrain's max velocity (inches/sec)
-            slowdownFactor = std::clamp(1.0f - (fabs(currentVel) / maxSpeed), 0.3, 1.0);
-
-        }
-        // === End new section ===
-        lastPoseForVel = pose;
-        lastTime = currentTime;
-
-        if (distTarget < 5 && !headingLocked) {
-    finalHeading = pose.angle(target); // freeze the current target direction
-    headingLocked = true;
-}
-
-       const float adjustedTheta = params.forwards ? pose.theta : pose.theta + M_PI;
-        float angularError = angleError(adjustedTheta, finalHeading);
-
-        float lateralError = distTarget * cos(angleError(pose.theta, pose.angle(target)));
-
-// PID outputs
-
-        float lateralOut = lateralPID.update(lateralError);
-        float angularOut = angularPID.update(radToDeg(angularError));
-
-        // Apply smart decel
-        lateralOut *= slowdownFactor;
-
-// Optional: small heading correction near target
-if (distTarget < 10) angularOut *= 0.3f;
         // update exit conditions
         lateralSmallExit.update(lateralError);
         lateralLargeExit.update(lateralError);
 
-    
-        if (distTarget < 10) {
-    float headingScale = std::clamp(distTarget / 10.0f, 0.0f, 1.0f);
-    angularOut *= headingScale; // fade out smoothly
-}
-
+        // get output from PIDs
+        float lateralOut = lateralPID.update(lateralError);
+        float angularOut = angularPID.update(radToDeg(angularError));
+        if (close) angularOut = 0;
 
         // apply restrictions on angular speed
         angularOut = std::clamp(angularOut, -params.maxSpeed, params.maxSpeed);
         angularOut = slew(angularOut, prevAngularOut, angularSettings.slew);
 
         // apply restrictions on lateral speed
+        // ---------------------------
+        // PROPORTIONAL DECELERATION
+        // ---------------------------
+
+        // distTarget already computed above
+        // Example: start decel at 12", target = 0"
+        // decelScale goes from 1 → 0 as you approach target
+        if (distTarget < params.decelStartDist) {
+            float scale = distTarget / params.decelStartDist;
+
+            // Apply proportional curve (exponent = decelFactor)
+            scale = pow(scale, params.decelFactor);
+
+            // scale the lateral speed
+            lateralOut *= scale;
+        }
+
         lateralOut = std::clamp(lateralOut, -params.maxSpeed, params.maxSpeed);
         // constrain lateral output by max accel
         // but not for decelerating, since that would interfere with settling
@@ -143,8 +115,7 @@ if (distTarget < 10) angularOut *= 0.3f;
         if (params.forwards && lateralOut < fabs(params.minSpeed) && lateralOut > 0) lateralOut = fabs(params.minSpeed);
         if (!params.forwards && -lateralOut < fabs(params.minSpeed) && lateralOut < 0)
             lateralOut = -fabs(params.minSpeed);
-        
-        
+
         // update previous output
         prevAngularOut = angularOut;
         prevLateralOut = lateralOut;
@@ -163,26 +134,12 @@ if (distTarget < 10) angularOut *= 0.3f;
         // move the drivetrain
         drivetrain.leftMotors->move(leftPower);
         drivetrain.rightMotors->move(rightPower);
-        
 
         // delay to save resources
         pros::delay(10);
     }
 
-        // stop the drivetrain
-        // --- Final heading hold (stabilization) ---
-    float finalTheta = getPose().theta;
-    for (int i = 0; i < 20; i++) { // 20 * 10ms = 200ms
-        float headingError = angleError(finalTheta, getPose().theta);
-        float angularHold = angularPID.update(radToDeg(headingError));
-        angularHold = std::clamp(angularHold, -40.0f, 40.0f);
-
-        drivetrain.leftMotors->move(angularHold);
-        drivetrain.rightMotors->move(-angularHold);
-
-        pros::delay(10);
-    }
-
+    // stop the drivetrain
     drivetrain.leftMotors->move(0);
     drivetrain.rightMotors->move(0);
     // set distTraveled to -1 to indicate that the function has finished

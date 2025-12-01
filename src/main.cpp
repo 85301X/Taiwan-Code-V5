@@ -1,3 +1,4 @@
+
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/trackingWheel.hpp"
@@ -14,21 +15,7 @@
 #include <string>
 #include "global.h"
 #include <iostream>
-/*
-void antijam_task_fn(void* param){
-    while (true){
-        simpleIntakeControl();
-        pros::delay(10);
-    }
-}
 
-void autoantijamtask(void* param){
-    while (true){
-        auto_intake_jam();
-        pros::delay(10);
-    }
-}
-	*/
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -37,24 +24,14 @@ void autoantijamtask(void* param){
  */
 void initialize() {
     pros::lcd::initialize(); // initialize brain screen
-	pros::lcd::print(0, "sigma skibidi balls");
+	pros::lcd::print(0, "Runing");
     chassis.calibrate(); // calibrate sensors
     controller.clear();
-     gps1.set_data_rate(5);
+    gps1.set_data_rate(5);
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
-   
-    //pros clear screen
-  
-
-    // the default rate is 50. however, if you need to change the rate, you
-    // can do the following.
-    // lemlib::bufferedStdout().setRate(...);
-    // If you use bluetooth or a wired connection, you will want to have a rate of 10ms
-
-    // for more information on how the formatting for the loggers
-    // works, refer to the fmtlib docs
-
-    // thread to for brain screen and position logging
+    odomy.set_reversed(true);
+    optical.set_integration_time(5);
+    odomx.set_reversed(true);
    
         }
 
@@ -83,28 +60,15 @@ void competition_initialize() {
  * This is an example autonomous routine which demonstrates a lot of the features LemLib has to offer
  */
 void autonomous() {
-    // Testing_code();
-  // pros:: Task an(autoantijamtask, (void*)"PROS", TASK_PRIORITY_DEFAULT);
-    // Auton_Skills_V3();
-    // Auton_Skills_V3();
- 
-//   Blue_Right_AWP();
-	// soloAWP();
-    pidtesting();
+    
+  
+   austinRightAWP();
 }
 
 /**
  * Runs in driver control
  */
 
-float apply_deadzone(float value, int factor){
-    if (std:: abs(value) > 5){
-        return (0.5 * std::abs(value / factor) * (value / factor)) ;
-    }
-    else{
-        return 0.0;
-    }
-}
 
 float drive_speed_factor = 1.0;
 float turn_speed_factor = 1.2;
@@ -119,27 +83,98 @@ bool hang = true;
 int speed_switch = 1;
 bool intake_spinning = true;
 bool ejection = false;
+std:: string detected_color;
+std:: string toss_color = "BLUE";
+bool tossing =false;
 
+
+void color_sort() {
+    // Read optical sensor values
+    int hue = optical.get_hue();
+    int proximity = optical.get_proximity();
+
+    // -----------------------------
+    // 1. COLOR DETECTION
+    // -----------------------------
+    if (proximity > 100) {
+        if (hue >= 100 && hue <= 200) {
+            detected_color = "BLUE";
+        }
+        else if (hue >= 10 && hue <= 21) {
+            detected_color = "RED";
+        }
+        else {
+            detected_color = "NO";
+        }
+    }
+    else {
+        detected_color = "NO";
+    }
+
+    // -----------------------------
+    // 2. SORTING DECISION
+    // -----------------------------
+    const bool should_toss = 
+        (detected_color == toss_color) && 
+        (toss_color != "NO") &&
+        !tossing;                 // avoids double-triggering
+
+    if (!should_toss) return;
+
+    // -----------------------------
+    // 3. PERFORM TOSSING ACTION
+    // -----------------------------
+    tossing = true;
+
+    // Store current velocity to restore later
+    double previous_velocity = outake.get_actual_velocity();
+
+    // Stop everything before reversing
+    outake.move_velocity(0);
+    outake_2.move_velocity(0);
+
+    // Reverse to eject incorrect triball
+    outake.move_velocity(-600);
+    outake_2.move_velocity(-600);
+
+    pros::delay(500);
+
+    // -----------------------------
+    // 4. RESTORE PREVIOUS STATE
+    // -----------------------------
+    if (previous_velocity > 100) {
+        outake.move_velocity(previous_velocity);
+        outake_2.move_velocity(previous_velocity);
+    }
+    else {
+        outake.move_velocity(0);
+        outake_2.move_velocity(0);
+    }
+
+    tossing = false;
+}
 
 void print_task_fn(void *param){
     //print imu inertial heading
    
     while (true){
+       
+      color_sort();
         pros::lcd::print(1, "heading: %f", inertial.get_heading());
         pros::lcd::print(2, "x: %f", chassis.getPose().x);
         pros::lcd::print(3, "y: %f", chassis.getPose().y);
            pros::lcd::print(1, "heading: %f", inertial.get_heading());
-        pros::lcd::print(2, "gps_x: %f",gps1.get_position().x*39.37);
-
-        pros::lcd::print(3, "gps_y: %f", gps1.get_position().y*39.37);
-        pros::lcd::print(4, "in: %f",gps1.get_heading());
-        //print on controller
-        //print on controller
-     //   controller.print(1, 0, "x: %.2f,y:%.2f,I:%.2f", chassis.getPose().x,chassis.getPose().y,inertial.get_heading());
+      
+        pros::lcd::print(4, "in: %f",outake.get_actual_velocity());
+     pros::lcd::print(5,  "Color: %s", toss_color);
+        pros::lcd::print(6,  "Color: %s", detected_color);
+        //print toss color
         
-     //   controller.print(4, 0, "x: %f",  gps1.get_position().x);
-      //  controller.print(5, 0, "y: %f", gps1.get_position().y);
-        controller.print(1, 0, "in: %f",  inertial.get_heading());
+        //print on controller
+        //print on controller
+      //  controller.print(1, 0, "x: %.2f,y:%.2f,I:%.2f", chassis.getPose().x,chassis.getPose().y,inertial.get_heading());
+     
+        controller.print(1, 0, "in: %.0f ,y: %.0f,,x:%.0f c:%s",  inertial.get_heading(),chassis.getPose().y,chassis.getPose().x,toss_color);
 
         pros::delay(100);
 }
@@ -148,9 +183,88 @@ bool loaded_2 = false;
 bool loaded_1 = false;
 
 
+void updateDrive(int forward, int turn, bool directionMode) {
+        if (directionMode) chassis.curvature(forward, turn);
+        else chassis.curvature(-forward, -turn);
+    }
+
+    class IntakeSystem {
+public:
+    void scoreFull() {
+        if (!tossing) {
+            outake.move_velocity(600);
+            outake_2.move_velocity(-600);
+        }
+        intake.move_velocity(600);
+        outpist.set_value(true);
+        outakestopped = false;
+        intake_spinning = true;
+    }
+
+    void scoreHalf() {
+        if (!tossing) {
+            outake.move_velocity(600);
+            outake_2.move_velocity(-600);
+        }
+        intake.move_velocity(600);
+        intake_spinning = true;
+        outakestopped = false;
+    }
+
+    void reverseIntake() {
+        if (!tossing) {
+            outake.move_velocity(-600);
+            outake_2.move_velocity(600);
+        }
+        intake.move_velocity(-600);
+        intake_spinning = true;
+        outakestopped = false;
+    }
+
+    void intakeOnly() {
+        intake.move_velocity(600);
+        if (!tossing) {
+            outake.move_velocity(-600);
+            outake_2.move_velocity(-600);
+        }
+        intake_spinning = true;
+        outakestopped = false;
+    }
+
+    void stopAll() {
+        if (!outakestopped) {
+            outake.move_velocity(0);
+            outake_2.move_velocity(0);
+            outakestopped = true;
+        }
+        if (intake_spinning) {
+            intake.move_velocity(0);
+            intake_spinning = false;
+        }
+        outpist.set_value(false);
+    }
+};
+
+class PneumaticsSystem {
+public:
+    void toggleLoad1() {
+        load_1.set_value(loaded_1);
+        loaded_1 = !loaded_1;
+    }
+
+    void toggleDoinker() {
+        doinker.set_value(doinked);
+        doinked = !doinked;
+    }
+};
+
+
+
+
+
 void opcontrol() {
     controller.clear();
-    controller.clear_line(2);
+
 
   
    // pros::Task antijam_task(antijam_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
@@ -173,44 +287,80 @@ void opcontrol() {
 
     // ----- Use your drive method with adjusted inputs -----
         if (directionmode){ 
-                 chassis.curvature(raw_forward, raw_turn);
+              chassis.curvature(raw_forward, raw_turn);
             }
         else{
-                 chassis.curvature(-raw_forward, raw_turn);
+                 chassis.curvature(-raw_forward, -raw_turn);
             }
       
 
         //========================================================================================================
         //  color sort done
     // Button controls for intake and outtake
-        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) {
+        if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) { // score
+            if (tossing == false ){
             outake.move_velocity(600);
+            outake_2.move_velocity(-600);
+            }
+            intake.move_velocity(600);
+            outakestopped = false;
+            intake_spinning = true;
+            outpist.set_value(true);
+        } 
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) { // score
+            if (tossing == false ){
+            outake.move_velocity(600);
+            outake_2.move_velocity(-600);
+            }
             intake.move_velocity(600);
             outakestopped = false;
             intake_spinning = true;
         } 
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) {
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) { // reverse intake 
+              if (tossing == false ){
             outake.move_velocity(-600);
+            outake_2.move_velocity(600);
+            }
             intake.move_velocity(-600);
             outakestopped = false;
             intake_spinning = true;
         } 
-        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) {
+        else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // cahnged
             intake.move_velocity(600);
+             if (tossing == false ){
             outake.move_velocity(-600);
+              outake_2.move_velocity(-600);
+            }
             intake_spinning = true;
             outakestopped = false;
         } 
         else {  // No buttons pressed
             if (!outakestopped) {
                 outake.move_velocity(0);
+                outake_2.move_velocity(0);
                 outakestopped = true;
             }
             if (intake_spinning) {
                 intake.move_velocity(0);
                 intake_spinning = false;
             }
+            outpist.set_value(false);
         }
+        //========================================================================================================
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
+            //switch toss color from no > red > blue > no
+            if (toss_color == "RED")
+            {
+                toss_color = "BLUE";
+            }
+            
+            else if (toss_color == "BLUE")
+            {
+                toss_color = "RED";
+
+        }
+    }
+
 
          if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
             
@@ -224,46 +374,26 @@ void opcontrol() {
              
         }
         // === Pneumatic F toggle (L1) ===
-     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)){
+     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_Y)){
                 load_1.set_value(loaded_1);
                 loaded_1 = !loaded_1;  
         }
+    if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)){
+                doinker.set_value(doinked);
+                doinked = !doinked;  
+        }
         //doink code done
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){       
-                load_2.set_value(loaded_2);
-                loaded_2 = !loaded_2;    
-        }
+       
 
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_UP)){
-            linearController.kP += 0.1;
-            
-         controller.print(2, 0, "kP: %.3f,KD:%.3f", linearController.kP,linearController.kD);
-         }
-    
-       if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_DOWN)){
-           linearController.kD += 0.1;
-        //    linearController.kD = linearController.kD + 1;
-                  controller.print(2, 0, "kP: %.3f,KD:%.3f", linearController.kP,linearController.kD);
-        }
 
        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){
            chassis.calibrate();
            pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, ".");
        }
 
-    //     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_UP)){
-    //         linearController.kP += 1;
-            
-    //      controller.print(1, 0, "kP: %f", linearController.kP);
-    //      }
-    
-    //    if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_DOWN)){
-    //        linearController.kD += 1;
-    //        controller.print(1, 0, "kD: %f", linearController.kD);
-    //     }
-       
+  
         // delay to save resources
         pros::delay(25);
         
     }
-}
+}/**/
