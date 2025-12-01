@@ -65,7 +65,8 @@ void pidtesting(){
 
 }
 
-void austinRightAWP() { // RED
+void Blue_Right_AWP() { // RED
+    //=============set pose ============================================================
     chassis.setPose(0, 0, 270);
     intake.move_velocity(600);
     chassis.moveToPoint(-19, 0, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
@@ -89,6 +90,7 @@ void austinRightAWP() { // RED
     long_goal(2000);
     
     load_1.set_value(false);
+      //=============set pose ============================================================
     chassis.setPose(-35,-24,chassis.getPose().theta);
     chassis.moveToPoint(-19, 0, 2000,{.maxSpeed = 120, .minSpeed = 40,.earlyExitRange=3});
 
