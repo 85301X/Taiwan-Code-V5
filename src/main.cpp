@@ -62,7 +62,7 @@ void competition_initialize() {
 void autonomous() {
     
   
-   Blue_Right_AWP();
+   soloAWP();
 }
 
 /**

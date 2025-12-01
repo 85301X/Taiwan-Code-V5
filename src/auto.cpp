@@ -45,6 +45,24 @@ void timedriving(float timeout,bool forward,int velocity){
     }
 }
 
+void  middle_goal(int time) {
+      if (outake.get_actual_velocity() > 80){ 
+        intake.move(127);
+        outake_2.move(-127);
+        outake.move(127);
+        pros::delay(200);
+        outake.move(-127);
+        outake_2.move_velocity(-150);
+      }
+      else {
+        intake.move(127);
+        outake_2.move(-40);
+        outake.move_velocity(-150);
+      }
+      pros::delay(time);
+      outake.move_velocity(0);
+        outake_2.move_velocity(0);
+    }
 
 void intakemove(){
     intake.move_velocity(600);
@@ -75,9 +93,8 @@ void soloAWP() { // RED
     load_1.set_value(true);
     chassis.waitUntilDone();
     chassis.turnToHeading(0, 2000);
-    timedriving(300,true,300);
-
-
+ 
+   
     chassis.moveToPoint(-34.5, 10, 1000, {.maxSpeed = 120, .minSpeed = 40});
     chassis.waitUntilDone();
      pros::delay(300);
@@ -103,18 +120,45 @@ void soloAWP() { // RED
     chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 50,.earlyExitRange=2});
     pros::delay(150);
   
-    chassis.moveToPoint(32, -27, 2000, {.maxSpeed = 127, .minSpeed = 70});
-      pros::delay(200);
+    chassis.moveToPoint(29, -27, 2000, {.maxSpeed = 127, .minSpeed = 70});
+      pros::delay(100);
       load_1.set_value(true);
+  
     //finish gettinng rings
+    chassis.turnToHeading(47, 2000);
+    chassis.moveToPoint(22, -43, 1000, {.forwards=false,.maxSpeed = 127, .minSpeed = 0});
+    chassis.waitUntilDone();
+   
+    middle_goal(1800);
+
+ 
+    chassis.moveToPoint(56, -9, 2000, {.maxSpeed = 127, .minSpeed = 70});
+      pros::delay(270);
+      load_1.set_value(true);
+    chassis.swingToHeading(0 ,lemlib::DriveSide::LEFT, 500);
+
+  
+    chassis.waitUntilDone();
+      chassis.moveToPoint(67, 4, 2000, {.maxSpeed = 127, .minSpeed = 70});
+      intake.move_velocity(600);
+       chassis.waitUntilDone();
+     pros::delay(300);
+ 
+    
+    chassis.moveToPoint(67, -24, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 70});
+    long_goal(2000);
+       /*
     chassis.turnToPoint(53,-5, 300,{.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,});
   
     chassis.moveToPoint(53, -5, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
+    
     load_1.set_value(false);
+    
     chassis.turnToHeading(0, 200);
     chassis.moveToPoint(67, -22, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 40,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
     chassis.waitUntilDone();
     long_goal(2000);
+    */
     //outpist.set_value(0);
 //     pros::delay(200);
 //     pros::delay(300);
