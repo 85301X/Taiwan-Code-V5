@@ -50,9 +50,7 @@ extern void print_task_fn(void* param);
 extern void ring_toss_task_fn(void* param);
 
 extern void Auton_Skills();
-extern void Auton_Skills_V2();
-extern void Auton_Skills_V3();
-extern void Auton_Skills_V4();
+
 
 extern void Blue_Right_AWP();
 extern void Blue_Left_AWP();

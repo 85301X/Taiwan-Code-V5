@@ -1,3 +1,4 @@
+#include "lemlib/chassis/chassis.hpp"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/trackingWheel.hpp"
@@ -65,8 +66,9 @@ void pidtesting(){
 
 }
 
-void Blue_Right_AWP() { // RED
+void soloAWP() { // RED
     //=============set pose ============================================================
+    /*
     chassis.setPose(0, 0, 270);
     intake.move_velocity(600);
     chassis.moveToPoint(-19, 0, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
@@ -91,11 +93,28 @@ void Blue_Right_AWP() { // RED
     
     load_1.set_value(false);
       //=============set pose ============================================================
+          */
     chassis.setPose(-35,-24,chassis.getPose().theta);
-    chassis.moveToPoint(-19, 0, 2000,{.maxSpeed = 120, .minSpeed = 40,.earlyExitRange=3});
 
-    chassis.turnToHeading(180-45,400);
-
+    chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 100, .minSpeed = 40,.earlyExitRange=2});
+    chassis.turnToHeading(90,900);
+    chassis.waitUntilDone();
+    intake.move_velocity(600);
+    chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 50,.earlyExitRange=2});
+    pros::delay(150);
+  
+    chassis.moveToPoint(32, -27, 2000, {.maxSpeed = 127, .minSpeed = 70});
+      pros::delay(200);
+      load_1.set_value(true);
+    //finish gettinng rings
+    chassis.turnToPoint(53,-5, 300,{.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,});
+  
+    chassis.moveToPoint(53, -5, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
+    load_1.set_value(false);
+    chassis.turnToHeading(0, 200);
+    chassis.moveToPoint(67, -22, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 40,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
+    chassis.waitUntilDone();
+    long_goal(2000);
     //outpist.set_value(0);
 //     pros::delay(200);
 //     pros::delay(300);
@@ -106,6 +125,7 @@ void Blue_Right_AWP() { // RED
 //     timedriving(300, false, 300);
 
 }
+
 
 
 void Auton_Skills_V4() {
@@ -375,7 +395,7 @@ void Blue_New_Left_AWP() {
     outake.move_velocity(600);
 }
 
-void soloAWP() {
+void soloAmhWP() {
     // help
   
   
@@ -456,3 +476,8 @@ void soloAWP() {
  
 }
 
+void Auton_Skills(){
+    Auton_Skills_V4();
+
+
+}
