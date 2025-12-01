@@ -48,21 +48,18 @@ extern bool intakeon;
 extern lemlib:: Chassis chassis;
 extern void print_task_fn(void* param);
 extern void ring_toss_task_fn(void* param);
-extern void auto_intake_jam();
+
 extern void Auton_Skills();
 extern void Auton_Skills_V2();
 extern void Auton_Skills_V3();
 extern void Auton_Skills_V4();
-extern void intakemove();
+
 extern void Blue_Right_AWP();
 extern void Blue_Left_AWP();
-extern void Blue_New_Left_AWP();
-extern void goof_left_soloAWP();
-extern void Blue_Right_New_AWP();
-extern void austinRightAWP();
-extern void updateLinearControllerSlew(float slew);
-extern void simpleIntakeControl();
-extern void auto_intake_jam();
+
+
+
+
 extern void moveToWithHeading( double endHeading, double& targetX, double& targetY);
 //extern pros:: Rotation odomy;
 extern lemlib::TrackingWheel vertical_tracking_wheel;
