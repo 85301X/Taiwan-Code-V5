@@ -75,7 +75,7 @@ float turn_speed_factor = 1.2;
 bool directionmode = true;
 double drive_left_speed=0;
 double drive_right_speed=0;
-bool outakestopped = true;
+bool Stage_3stopped = true;
 bool clamped = true;
 bool doinked = true;
 bool hooking = false;
@@ -127,15 +127,15 @@ void color_sort() {
     tossing = true;
 
     // Store current velocity to restore later
-    double previous_velocity = outake.get_actual_velocity();
+    double previous_velocity = Stage_3.get_actual_velocity();
 
     // Stop everything before reversing
-    outake.move_velocity(0);
-    outake_2.move_velocity(0);
+    Stage_3.move_velocity(0);
+    Stage_2.move_velocity(0);
 
     // Reverse to eject incorrect triball
-    outake.move_velocity(-600);
-    outake_2.move_velocity(-600);
+    Stage_3.move_velocity(-600);
+    Stage_2.move_velocity(-600);
 
     pros::delay(500);
 
@@ -143,12 +143,12 @@ void color_sort() {
     // 4. RESTORE PREVIOUS STATE
     // -----------------------------
     if (previous_velocity > 100) {
-        outake.move_velocity(previous_velocity);
-        outake_2.move_velocity(previous_velocity);
+        Stage_3.move_velocity(previous_velocity);
+        Stage_2.move_velocity(previous_velocity);
     }
     else {
-        outake.move_velocity(0);
-        outake_2.move_velocity(0);
+        Stage_3.move_velocity(0);
+        Stage_2.move_velocity(0);
     }
 
     tossing = false;
@@ -159,13 +159,13 @@ void print_task_fn(void *param){
    
     while (true){
        
-      color_sort();
+     // color_sort();
         pros::lcd::print(1, "heading: %f", inertial.get_heading());
         pros::lcd::print(2, "x: %f", chassis.getPose().x);
         pros::lcd::print(3, "y: %f", chassis.getPose().y);
            pros::lcd::print(1, "heading: %f", inertial.get_heading());
       
-        pros::lcd::print(4, "in: %f",outake.get_actual_velocity());
+        pros::lcd::print(4, "in: %f",Stage_3.get_actual_velocity());
      pros::lcd::print(5,  "Color: %s", toss_color);
         pros::lcd::print(6,  "Color: %s", detected_color);
         //print toss color
@@ -183,81 +183,6 @@ bool loaded_2 = false;
 bool loaded_1 = false;
 
 
-void updateDrive(int forward, int turn, bool directionMode) {
-        if (directionMode) chassis.curvature(forward, turn);
-        else chassis.curvature(-forward, -turn);
-    }
-
-    class IntakeSystem {
-public:
-    void scoreFull() {
-        if (!tossing) {
-            outake.move_velocity(600);
-            outake_2.move_velocity(-600);
-        }
-        intake.move_velocity(600);
-        outpist.set_value(true);
-        outakestopped = false;
-        intake_spinning = true;
-    }
-
-    void scoreHalf() {
-        if (!tossing) {
-            outake.move_velocity(600);
-            outake_2.move_velocity(-600);
-        }
-        intake.move_velocity(600);
-        intake_spinning = true;
-        outakestopped = false;
-    }
-
-    void reverseIntake() {
-        if (!tossing) {
-            outake.move_velocity(-600);
-            outake_2.move_velocity(600);
-        }
-        intake.move_velocity(-600);
-        intake_spinning = true;
-        outakestopped = false;
-    }
-
-    void intakeOnly() {
-        intake.move_velocity(600);
-        if (!tossing) {
-            outake.move_velocity(-600);
-            outake_2.move_velocity(-600);
-        }
-        intake_spinning = true;
-        outakestopped = false;
-    }
-
-    void stopAll() {
-        if (!outakestopped) {
-            outake.move_velocity(0);
-            outake_2.move_velocity(0);
-            outakestopped = true;
-        }
-        if (intake_spinning) {
-            intake.move_velocity(0);
-            intake_spinning = false;
-        }
-        outpist.set_value(false);
-    }
-};
-
-class PneumaticsSystem {
-public:
-    void toggleLoad1() {
-        load_1.set_value(loaded_1);
-        loaded_1 = !loaded_1;
-    }
-
-    void toggleDoinker() {
-        doinker.set_value(doinked);
-        doinked = !doinked;
-    }
-};
-
 
 
 
@@ -270,14 +195,14 @@ void opcontrol() {
    // pros::Task antijam_task(antijam_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
     //use print task to print imu heading and position
     pros::Task print_task(print_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
-    outake.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+    Stage_3.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     leftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     rightMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     // controller
     // loop to continuously update motors
     while (true) {
         // get joystick positions
-         outake.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+         Stage_3.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     leftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     rightMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
         int raw_forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -298,47 +223,51 @@ void opcontrol() {
         //  color sort done
     // Button controls for intake and outtake
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) { // score
+              outpist.set_value(true);
             if (tossing == false ){
-            outake.move_velocity(600);
-            outake_2.move_velocity(-600);
+            Stage_3.move_velocity(600);
+            Stage_2.move_velocity(-600);
             }
             intake.move_velocity(600);
-            outakestopped = false;
+            Stage_3stopped = false;
             intake_spinning = true;
-            outpist.set_value(true);
+               outpist.set_value(false);
         } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) { // score
+              outpist.set_value(false);
             if (tossing == false ){
-            outake.move_velocity(600);
-            outake_2.move_velocity(-600);
+            Stage_3.move_velocity(600);
+            Stage_2.move_velocity(-600);
             }
             intake.move_velocity(600);
-            outakestopped = false;
+            Stage_3stopped = false;
             intake_spinning = true;
         } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) { // reverse intake 
+              outpist.set_value(false);
               if (tossing == false ){
-            outake.move_velocity(-600);
-            outake_2.move_velocity(600);
+            Stage_3.move_velocity(-600);
+            Stage_2.move_velocity(600);
             }
             intake.move_velocity(-600);
-            outakestopped = false;
+            Stage_3stopped = false;
             intake_spinning = true;
         } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // cahnged
+              outpist.set_value(false);
             intake.move_velocity(600);
              if (tossing == false ){
-            outake.move_velocity(-600);
-              outake_2.move_velocity(-600);
+            Stage_3.move_velocity(-600);
+              Stage_2.move_velocity(-600);
             }
             intake_spinning = true;
-            outakestopped = false;
+            Stage_3stopped = false;
         } 
         else {  // No buttons pressed
-            if (!outakestopped) {
-                outake.move_velocity(0);
-                outake_2.move_velocity(0);
-                outakestopped = true;
+            if (!Stage_3stopped) {
+                Stage_3.move_velocity(0);
+                Stage_2.move_velocity(0);
+                Stage_3stopped = true;
             }
             if (intake_spinning) {
                 intake.move_velocity(0);
@@ -386,11 +315,7 @@ void opcontrol() {
        
 
 
-       if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_RIGHT)){
-           chassis.calibrate();
-           pros::c::controller_rumble(pros::E_CONTROLLER_MASTER, ".");
-       }
-
+     
   
         // delay to save resources
         pros::delay(25);

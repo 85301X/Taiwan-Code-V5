@@ -20,8 +20,8 @@ pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right moto
 pros:: Gps gps1(21,-0.13,-0.095,-90);;
 
 pros:: Motor intake(1 ,pros::MotorGearset::blue);
-pros:: Motor outake({2 },pros::MotorGearset::blue);
-pros:: Motor outake_2({3 },pros::MotorGearset::blue);
+pros:: Motor Stage_3({2 },pros::MotorGearset::blue);
+pros:: Motor Stage_2({3 },pros::MotorGearset::blue);
 
 
 // Inertial Sensor on port 10
@@ -94,15 +94,15 @@ lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
 
 lemlib:: ExpoDriveCurve throttle(
 5,
-30,
+10,
 1.008
 
 );
 
 lemlib:: ExpoDriveCurve steer(
 5,
-30,
-1.019
+10,
+1.008
 
 );
 /*

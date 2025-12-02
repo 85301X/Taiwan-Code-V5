@@ -18,8 +18,8 @@ extern pros::Controller controller;
 
 extern pros::MotorGroup leftMotors;
 extern pros::MotorGroup rightMotors;
-extern pros::Motor outake;
-extern pros::Motor outake_2;
+extern pros::Motor Stage_3;
+extern pros::Motor Stage_2;
 extern pros:: Motor hook;
 extern pros::Motor intake;
 extern pros:: Rotation odomy;
