@@ -62,7 +62,7 @@ void competition_initialize() {
 void autonomous() {
     
   
-   soloAWP();
+   Blue_Right_AWP();
 }
 
 /**
@@ -182,7 +182,7 @@ void print_task_fn(void *param){
 bool loaded_2 = false;
 bool loaded_1 = false;
 
-
+ 
 
 
 
@@ -198,70 +198,65 @@ void opcontrol() {
     Stage_3.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     leftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     rightMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+
     // controller
     // loop to continuously update motors
     while (true) {
         // get joystick positions
-         Stage_3.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-    leftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
-    rightMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
+       
         int raw_forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
 
         int raw_turn = controller.get_analog(pros::E_CONTROLLER_ANALOG_RIGHT_X);
     
 
     // ----- Use your drive method with adjusted inputs -----
-        if (directionmode){ 
-              chassis.curvature(raw_forward, raw_turn);
-            }
-        else{
-                 chassis.curvature(-raw_forward, -raw_turn);
-            }
+        if (directionmode)   chassis.curvature(raw_forward, raw_turn);
+        else chassis.curvature(-raw_forward, -raw_turn);
+            
       
-
         //========================================================================================================
         //  color sort done
     // Button controls for intake and outtake
         if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R2)) { // score
               outpist.set_value(true);
             if (tossing == false ){
-            Stage_3.move_velocity(600);
-            Stage_2.move_velocity(-600);
+                Stage_3.move_velocity(600);
+                Stage_2.move_velocity(-600);
             }
-            intake.move_velocity(600);
-            Stage_3stopped = false;
-            intake_spinning = true;
-               outpist.set_value(false);
+                intake.move_velocity(600);
+                Stage_3stopped = false;
+                intake_spinning = true;
+             
         } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_R1)) { // score
               outpist.set_value(false);
             if (tossing == false ){
-            Stage_3.move_velocity(600);
-            Stage_2.move_velocity(-600);
+                Stage_3.move_velocity(600);
+                Stage_2.move_velocity(-600);
             }
-            intake.move_velocity(600);
-            Stage_3stopped = false;
-            intake_spinning = true;
-        } 
+                intake.move_velocity(600);
+                Stage_3stopped = false;
+                intake_spinning = true;
+            } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_RIGHT)) { // reverse intake 
               outpist.set_value(false);
               if (tossing == false ){
-            Stage_3.move_velocity(-600);
-            Stage_2.move_velocity(600);
+                Stage_3.move_velocity(-600);
+                Stage_2.move_velocity(600);
             }
-            intake.move_velocity(-600);
-            Stage_3stopped = false;
-            intake_spinning = true;
+                intake.move_velocity(-600);
+                Stage_3stopped = false;
+                intake_spinning = true;
         } 
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // cahnged
-              outpist.set_value(false);
-            intake.move_velocity(600);
+                 outpist.set_value(false);
+                intake.move_velocity(600);
              if (tossing == false ){
-            Stage_3.move_velocity(-600);
-              Stage_2.move_velocity(-600);
+                Stage_3.move_velocity(-600);// middle goal scoring
+                Stage_2.move_velocity(-600);
             }
-            intake_spinning = true;
-            Stage_3stopped = false;
+                intake_spinning = true;
+                Stage_3stopped = false;
         } 
         else {  // No buttons pressed
             if (!Stage_3stopped) {
@@ -277,12 +272,10 @@ void opcontrol() {
         }
         //========================================================================================================
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-            //switch toss color from no > red > blue > no
             if (toss_color == "RED")
             {
                 toss_color = "BLUE";
             }
-            
             else if (toss_color == "BLUE")
             {
                 toss_color = "RED";

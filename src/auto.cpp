@@ -46,14 +46,16 @@ void timedriving(float timeout,bool forward,int velocity){
 }
 
 void  middle_goal(int time) {
-
-
-     Stage_3.move_velocity(-600);
-              Stage_2.move_velocity(-600);
-    pros::delay(time);
-    Stage_3.move_velocity(0);
-        Stage_2.move_velocity(0);
-  
+      Stage_3.move_velocity(-600);
+                Stage_2.move_velocity(600);
+    pros::delay(500);
+        Stage_3.move_velocity(-600);
+                Stage_2.move_velocity(-600);
+ pros::delay(time);
+        Stage_3.move_velocity(0);
+        
+                Stage_2.move_velocity(0);
+    pros::delay(100);
     }
 
 void intakemove(){
@@ -75,6 +77,51 @@ void pidtesting(){
   
 
 }
+
+void Blue_Right_AWP() { // RED
+    //=============set pose ============================================================
+   /**
+    chassis.setPose(0, 0, 270);
+    intake.move_velocity(600);
+    chassis.moveToPoint(-15.6, 0, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,.decelStartDist=4,.decelFactor=1.5});
+    load_1.set_value(true);
+    chassis.waitUntilDone();
+    chassis.swingToHeading(0,lemlib::DriveSide::RIGHT , 2000);
+ 
+
+    chassis.moveToPoint(-32.5, 10, 1000, {.maxSpeed = 120, .minSpeed = 40});
+    chassis.waitUntilDone();
+     pros::delay(300);
+ 
+    
+   chassis.moveToPose(-33,-32,0, 1000, {.forwards = false,.lead=0.3, .maxSpeed = 127, .minSpeed = 80});
+  
+
+    chassis.waitUntilDone();
+
+    //outpist.set_value(false);
+    long_goal(2000);
+    
+    load_1.set_value(false);
+       
+    outpist.set_value(false);
+    chassis.setPose(-35,-24,chassis.getPose().theta);
+
+    chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 100, .minSpeed = 40,.earlyExitRange=2});
+    chassis.turnToHeading(90,900);
+ 
+    chassis.waitUntilDone();
+    intake.move_velocity(600);
+    Stage_3.move_velocity(600);
+    Stage_2.move_velocity(-600);
+    chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
+    */
+      chassis.setPose(-13, -27, chassis.getPose().theta);
+
+      //=============set pose ============================================================
+}
+
+
 
 void soloAWP() { // RED
     //=============set pose ============================================================
@@ -102,46 +149,52 @@ void soloAWP() { // RED
     
     load_1.set_value(false);
       //=============set pose ============================================================
-          */
-            outpist.set_value(false);
+          
+     
+    outpist.set_value(false);
     chassis.setPose(-35,-24,chassis.getPose().theta);
 
     chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 100, .minSpeed = 40,.earlyExitRange=2});
     chassis.turnToHeading(90,900);
     chassis.waitUntilDone();
     intake.move_velocity(600);
-    Stage_2.move_velocity(-200);
+    Stage_3.move_velocity(600);
+    Stage_2.move_velocity(-600);
     chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
      
     chassis.moveToPoint(29, -27, 2000, {.maxSpeed = 127, .minSpeed = 70});
-      pros::delay(110);
+      pros::delay(60);
       load_1.set_value(true);
   
     //finish gettinng rings
     chassis.turnToHeading(46, 2000);
-    chassis.moveToPoint(22, -43, 1000, {.forwards=false,.maxSpeed = 127, .minSpeed = 4});
+    chassis.moveToPoint(21, -44, 1000, {.forwards=false,.maxSpeed = 127, .minSpeed = 4});
     chassis.waitUntilDone();
-   
-    middle_goal(500);
 
- 
+    middle_goal(650);
+
+
     chassis.moveToPoint(54, -9, 2000, {.maxSpeed = 127, .minSpeed = 90});
      intake.move_velocity(600);
-    Stage_2.move_velocity(-600);
+    
       pros::delay(300);
+    
       load_1.set_value(true);
     chassis.swingToHeading(0 ,lemlib::DriveSide::LEFT, 500);
 
   
     chassis.waitUntilDone();
-      chassis.moveToPoint(63, 8, 2000, {.maxSpeed = 127, .minSpeed = 90});
-   ;
+      chassis.moveToPoint(62.2, 8, 1000, {.maxSpeed = 127, .minSpeed = 90});
+     
        chassis.waitUntilDone();
      pros::delay(200);
+               
  
-    
-    chassis.moveToPoint(65.5, -24, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 70});
+     Stage_2.move_velocity(0);
+    chassis.moveToPoint(63.0, -24, 1000, {.forwards=false,.maxSpeed = 127, .minSpeed = 70});
     long_goal(2000);
+    */
+       
        /*
     chassis.turnToPoint(53,-5, 300,{.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2,});
   

@@ -101,7 +101,7 @@ lemlib:: ExpoDriveCurve throttle(
 
 lemlib:: ExpoDriveCurve steer(
 5,
-10,
+20,
 1.008
 
 );
