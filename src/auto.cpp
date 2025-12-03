@@ -105,6 +105,8 @@ void Blue_Right_AWP() { // RED
     load_1.set_value(false);
        
     outpist.set_value(false);
+      */
+    
     chassis.setPose(-35,-24,chassis.getPose().theta);
 
     chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 100, .minSpeed = 40,.earlyExitRange=2});
@@ -115,8 +117,7 @@ void Blue_Right_AWP() { // RED
     Stage_3.move_velocity(600);
     Stage_2.move_velocity(-600);
     chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
-    */
-      chassis.setPose(-13, -27, chassis.getPose().theta);
+  
 
       //=============set pose ============================================================
 }
