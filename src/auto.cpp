@@ -1,4 +1,5 @@
 #include "lemlib/chassis/chassis.hpp"
+#include "liblvgl/display/lv_display.h"
 #include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "lemlib/chassis/trackingWheel.hpp"
@@ -108,17 +109,64 @@ void Blue_Right_AWP() { // RED
       */
     
     chassis.setPose(-35,-24,chassis.getPose().theta);
-
-    chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 100, .minSpeed = 40,.earlyExitRange=2});
+ 
+    chassis.moveToPoint(-35, -21, 100, {.forwards = true, .maxSpeed = 127, .minSpeed = 40,.earlyExitRange=2});
     chassis.turnToHeading(90,900);
  
     chassis.waitUntilDone();
-    intake.move_velocity(600);
+  
+     intake.move_velocity(600);
     Stage_3.move_velocity(600);
     Stage_2.move_velocity(-600);
-    chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
-  
 
+     chassis.moveToPoint(-13, -27, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
+   chassis.turnToHeading(230, 2000);
+        chassis.moveToPoint(-19, -39, 2000, {.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
+          chassis.swingToHeading(270, lemlib::DriveSide::RIGHT, 2000,{.maxSpeed = 100, .minSpeed = 0,});
+    load_1.set_value(true);
+        
+   chassis.moveToPoint(-25, -43.2, 2000, {.maxSpeed = 127, .minSpeed = 20});
+   
+       chassis.waitUntilDone();
+           load_1.set_value(false);
+        chassis.moveToPoint(-18, -43.2, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 20});
+       chassis.waitUntilDone();
+         
+           load_1.set_value(false);
+             chassis.moveToPose(-7.3, -27,230, 2000,{.forwards=false,.lead=0.5,.maxSpeed = 100,.minSpeed = 0,});
+             chassis.turnToHeading(132, 2000);
+       
+                chassis.moveToPoint(-1 ,-37.2, 2000,{.maxSpeed = 127, .minSpeed = 20});
+
+
+                
+       
+               chassis.moveToPoint(-49 ,0, 2000,{.forwards=false,.maxSpeed = 127, .minSpeed = 20});
+    chassis.swingToHeading(0, lemlib::DriveSide::RIGHT, 2000,{.maxSpeed = 100, .minSpeed = 0,});
+       chassis.moveToPoint(-49 ,-39, 2000,{.forwards=false,.maxSpeed = 127, .minSpeed = 20});
+              // chassis.swingToHeading(230, lemlib::DriveSide::RIGHT, 2000,{.maxSpeed = 100, .minSpeed = 0,});
+    /*
+    chassis.swingToHeading(260, lemlib::DriveSide::RIGHT, 2000);
+
+       load_1.set_value(true);
+    pros::delay(180);
+        chassis.swingToHeading(230, lemlib::DriveSide::RIGHT, 2000,{.maxSpeed = 127, .minSpeed = 80,.earlyExitRange=2});
+         chassis.moveToPoint(-24, -42, 2000, {.maxSpeed = 127, .minSpeed = 80});
+            chassis.moveToPoint(-8, -27, 2000, {.forwards=false,.maxSpeed = 127, .minSpeed = 80});
+            chassis.turnToHeading(136, 2000);
+        */
+    /*
+    load_1.set_value(false);
+    chassis.moveToPoint(-12, -41, 5000, {.maxSpeed = 50, .minSpeed = 30, .earlyExitRange=6.7});
+
+    
+    chassis.moveToPoint(-24, -44, 2000, {.maxSpeed = 45, .minSpeed = 45, .earlyExitRange = 1});
+    load_1.set_value(true);
+    // load_1.set_value(true);
+    // load_1.set_value(true);
+    chassis.swingToHeading(270-7, lemlib::DriveSide::RIGHT, 2000, {.maxSpeed = 127, .minSpeed = 80});
+    chassis.waitUntilDone();
+*/
       //=============set pose ============================================================
 }
 
