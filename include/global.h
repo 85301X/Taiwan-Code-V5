@@ -4,6 +4,7 @@
 
 #include "lemlib/chassis/chassis.hpp"
 #include "pros/adi.hpp"
+#include "pros/distance.hpp"
 #include "pros/gps.hpp"
 #include "pros/motors.hpp"
 #include "main.h"   
@@ -33,7 +34,9 @@ extern pros::adi :: DigitalOut outpist;
 extern pros::adi ::DigitalOut load_1;
 extern pros::adi ::DigitalOut doinker;
 extern pros::Rotation rotate;
-
+extern pros::Distance frontdist;
+extern pros::Distance leftdist;
+extern pros::Distance rightdist;
 //extern toss color
 extern std::string toss_color;
 extern int speed_switch;

@@ -1,4 +1,5 @@
 #include <cmath>
+#include "global.h"
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/logger/logger.hpp"
 #include "lemlib/timer.hpp"
@@ -56,6 +57,10 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
             close = true;
             params.maxSpeed = fmax(fabs(prevLateralOut), 60);
         }
+        if (params.useDistSensor) {
+        close = false;
+}
+
 
         // motion chaining
         const bool side =
@@ -69,7 +74,29 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
         // calculate error
         const float adjustedRobotTheta = params.forwards ? pose.theta : pose.theta + M_PI;
         const float angularError = angleError(adjustedRobotTheta, pose.angle(target));
-        float lateralError = pose.distance(target) * cos(angleError(pose.theta, pose.angle(target)));
+        float lateralError;
+
+    if (params.useDistSensor) {
+    // ------------------------------
+    // WALL DISTANCE MODE (IN INCHES)
+    // ------------------------------
+
+    // Get distance in mm
+    float mmDist = frontdist.get_distance(); // Replace with your object name
+   
+    float inchesDist = mmDist / 25.4;
+
+    // Error = how far the robot currently is - how far we want it to be
+     lateralError = inchesDist - params.distanceSenseTarget;
+
+    // If close enough (example tolerance: 0.5 inch), stop early
+    if (fabs(lateralError) <= 0.1) {
+        break; // we reached the desired distance to wall
+    }
+}
+
+    else {
+         lateralError = pose.distance(target) * cos(angleError(pose.theta, pose.angle(target)));}
 
         // update exit conditions
         lateralSmallExit.update(lateralError);
@@ -108,9 +135,12 @@ void lemlib::Chassis::moveToPoint(float x, float y, int timeout, MoveToPointPara
         if (!close) lateralOut = slew(lateralOut, prevLateralOut, lateralSettings.slew);
 
         // prevent moving in the wrong direction
-        if (params.forwards && !close) lateralOut = std::fmax(lateralOut, 0);
-        else if (!params.forwards && !close) lateralOut = std::fmin(lateralOut, 0);
+         if (!params.useDistSensor) {
+            if (params.forwards && !close) lateralOut = std::fmax(lateralOut, 0);
+            else if (!params.forwards && !close) lateralOut = std::fmin(lateralOut, 0);
+        }
 
+        
         // constrain lateral output by the minimum speed
         if (params.forwards && lateralOut < fabs(params.minSpeed) && lateralOut > 0) lateralOut = fabs(params.minSpeed);
         if (!params.forwards && -lateralOut < fabs(params.minSpeed) && lateralOut < 0)

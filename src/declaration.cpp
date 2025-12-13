@@ -17,7 +17,7 @@ pros::MotorGroup leftMotors({-11 , -12,-13},
                             pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
 pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
-pros:: Gps gps1(21,-0.13,-0.095,-90);;
+
 
 pros:: Motor intake(1 ,pros::MotorGearset::blue);
 pros:: Motor Stage_3({2 },pros::MotorGearset::blue);
@@ -33,7 +33,7 @@ pros::Optical optical(10);
 
 pros:: adi :: DigitalOut outpist('G');
 pros:: adi :: DigitalOut load_1('H',false);
-pros:: adi :: DigitalOut doinker('D');
+pros:: adi :: DigitalOut doinker('F');
  
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
@@ -55,36 +55,40 @@ lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
 );
 
 // lateral motion controller
-lemlib::ControllerSettings linearController(4.8, // proportional gain (kP)
+// lateral motion controller
+lemlib::ControllerSettings linearController(5.1, // proportional gain (kP)
                                               0.0, // integral gain (kI)
-                                            20, // derivative gain (kD)
-                                              0, // anti windup
+                                            30, // derivative gain (kD)
+                                              9, // anti windup
                                               0, // small error range, in inches
                                               0, // small error range timeout, in milliseconds
                                               0, // large error range, in inches
                                             0, // large error range timeout, in milliseconds
-                                              0// maximum acceleration (slew)
+                                              20// maximum acceleration (slew)
 );
 
 // angular motion controller
-lemlib::ControllerSettings angularController(5, // proportional gain (kP)
-                                              0.7, // integral gain (kI)
-                                              40.8, // derivative gain (kD)
-                                              1.3, // anti windup
-                                              2, // small error range, in inches
+lemlib::ControllerSettings angularController(7.9, // proportional gain (kP)
+                                              0.0, // integral gain (kI)
+                                              63, // derivative gain (kD)
+                                              1.5, // anti windup
+                                              3.5 , // small error range, in inches
                                               40, // small error range timeout, in milliseconds
                                               2, // large error range, in inches
                                               40, // large error range timeout, in milliseconds
-                                              100 // maximum acceleration (slew)
+                                              70 // maximum acceleration (slew)
 );
-// horizontal tracking wheel encoder
+// horizontal tracking wheel encode
 // vertical tracking wheel encoder
 // horizontal tracking wheel
-
+pros::Distance frontdist(18);
+pros::Distance leftdist(19);
+pros::Distance rightdist(15);
 // vertical tracking wheel
 lemlib::TrackingWheel vertical_tracking_wheel(&odomy, lemlib::Omniwheel::NEW_2, 0);
-lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,-0.04); // -0.05 -> 0
+lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,-0.07); // -0.05 -> 0
 // sensors for odometry
+
 lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal_tracking_wheel, // horizontal tracking wheel
@@ -94,15 +98,15 @@ lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
 
 lemlib:: ExpoDriveCurve throttle(
 5,
-10,
-1.008
+13,
+1.004
 
 );
 
 lemlib:: ExpoDriveCurve steer(
 5,
-20,
-1.008
+13,
+1.004
 
 );
 /*

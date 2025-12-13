@@ -329,6 +329,11 @@ struct MoveToPointParams {
     // NEW:
     float decelStartDist = 12;   // inches before target when decel begins
     float decelFactor = 1.0;     // 1.0 = linear, <1 = softer, >1 = stronger
+
+    bool useDistSensor = false;        // Whether distance-sensor override is enabled
+    float distanceSenseTarget = 0;          // Distance (in cm or mm) at which to stop
+
+
 };
 
 // default drive curve
