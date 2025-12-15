@@ -30,7 +30,7 @@ pros::Imu inertial(4); // 19 -> 8 because we're using new inertial sensor now
 
 pros::Optical optical(10);
 
-
+pros::Gps gps1(9);
 pros:: adi :: DigitalOut outpist('G');
 pros:: adi :: DigitalOut load_1('H',false);
 pros:: adi :: DigitalOut doinker('F');
@@ -85,11 +85,11 @@ pros::Distance frontdist(18);
 pros::Distance leftdist(19);
 pros::Distance rightdist(15);
 // vertical tracking wheel
-lemlib::TrackingWheel vertical_tracking_wheel(&odomy, lemlib::Omniwheel::NEW_2, 0);
-lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,-0.07); // -0.05 -> 0
+lemlib::TrackingWheel vertical_tracking_wheel(&odomy, lemlib::Omniwheel::NEW_2, -0.0);
+lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,0.05); // -0.05 -> 0
 // sensors for odometry
 
-lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
+lemlib::OdomSensors sensors(nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal_tracking_wheel, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -98,15 +98,15 @@ lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
 
 lemlib:: ExpoDriveCurve throttle(
 5,
-13,
-1.004
+5,
+1.008
 
 );
 
 lemlib:: ExpoDriveCurve steer(
 5,
-13,
-1.004
+5,
+1.008
 
 );
 /*

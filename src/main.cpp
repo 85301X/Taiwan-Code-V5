@@ -8,6 +8,7 @@
 #include "pros/llemu.hpp"
 #include "pros/misc.h"
 #include "pros/misc.hpp"
+#include "pros/gps.hpp"
 #include "pros/motors.h"
 #include "pros/optical.h"
 #include "pros/optical.hpp"
@@ -52,44 +53,14 @@ void competition_initialize() {
 	pros::lcd::print(0, "Runing");
     chassis.calibrate(); // calibrate sensors
     controller.clear();
-
     chassis.setBrakeMode(pros::E_MOTOR_BRAKE_BRAKE);
     odomy.set_reversed(true);
     optical.set_integration_time(5);
     optical.set_led_pwm(70);
     odomx.set_reversed(true);
-     while (true) {
-        // get joystick positions
-   
-    
-        //========================================================================================================
-        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
-            if (toss_color == "RED")
-            {
-                toss_color = "BLUE";
-            }
-            else if (toss_color == "BLUE")
-            {
-                toss_color = "RED";
-
-        }
-          pros::lcd::print(5,  "Color: %s", toss_color);
-          pros:: delay(100);
-    }
-
-
-        //doink code done
-       
-
-
-     
   
-        // delay to save resources
-        pros::delay(25);
        
-    }
-
-
+    
 }
 
 
@@ -105,14 +76,14 @@ void competition_initialize() {
 void autonomous() {
     
   
-   Auton_Skills();
+soloAWP();
 }
 
 /**
  * Runs in driver control
  */
 
-
+bool controlling = true;
 float drive_speed_factor = 1.0;
 float turn_speed_factor = 1.2;
 bool directionmode = true;
@@ -132,6 +103,18 @@ bool tossing =false;
 bool is_middle =false;
 bool outpisting =false;
 
+/*
+++------------------------------------------------++
+++------------------------------------------------++
+||  ____      _              ____             _   ||
+|| / ___|___ | | ___  _ __  / ___|  ___  _ __| |_ ||
+||| |   / _ \| |/ _ \| '__| \___ \ / _ \| '__| __|||
+||| |__| (_) | | (_) | |     ___) | (_) | |  | |_ ||
+|| \____\___/|_|\___/|_|    |____/ \___/|_|   \__|||
+||                                                ||
+++------------------------------------------------++
+++------------------------------------------------++
+*/
 void color_sort() {
 
     int hue = optical.get_hue();
@@ -221,14 +204,14 @@ void color_sort() {
 
 void print_task_fn(void *param){
     //print imu inertial heading
-   
+   controller.clear();
     while (true){
        color_sort() ;
      // color_sort();
      
         pros::lcd::print(1, "heading: %f", inertial.get_heading());
-        pros::lcd::print(2, "x: %f", chassis.getPose().x);
-        pros::lcd::print(3, "y: %f", chassis.getPose().y);
+        pros::lcd::print(2, "x: %f,%f", chassis.getPose().x,gps1.get_position_x());
+        pros::lcd::print(3, "y: %f,%f", chassis.getPose().y,gps1.get_position_y());
            pros::lcd::print(1, "heading: %f", inertial.get_heading());
       
         pros::lcd::print(4, "in: %f",Stage_3.get_actual_velocity());
@@ -247,7 +230,8 @@ void print_task_fn(void *param){
       //  controller.print(1, 0, "x: %.2f,y:%.2f,I:%.2f", chassis.getPose().x,chassis.getPose().y,inertial.get_heading());
      
 //        controller.print(1, 0, "in: %.0f ,y: %.0f,,x:%.0f c:%s",  inertial.get_heading(),chassis.getPose().y,chassis.getPose().x,toss_color);
- controller.print(1, 0, "%.0f, %.0f, %.0f, %.0f, %.0f, %.0f", frontdist.get_distance()/ 25.4,leftdist.get_distance()/ 25.4,chassis.getPose().x,chassis.getPose().y,inertial.get_heading());
+
+ controller.print(1, 0, "%.0f,%.0f,%.0f,%.0f,%.0f,%.0lf,%.0f,%.0lf       ", frontdist.get_distance()/ 25.4,leftdist.get_distance()/ 25.4,rightdist.get_distance()/ 25.4,chassis.getPose().x,chassis.getPose().y,inertial.get_heading(),gps1.get_position_x()/25.4,gps1.get_position_y()/25.4);
  // pros::lcd::print(5,  "f l %s r %s", toss_color);
         pros::delay(100);
  
@@ -277,7 +261,7 @@ void opcontrol() {
 
     // controller
     // loop to continuously update motors
-    while (true) {
+    while (controlling ==true) {
         // get joystick positions
    
         int raw_forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -334,17 +318,19 @@ void opcontrol() {
                 if( Stage_3stopped == true)
                 {
                       Stage_3.move(-127);
-                      Stage_2.move(127);
+                      Stage_2.move(-127);
                       pros::delay(200);
+                      Stage_3.move_velocity(-600);// middle goal scoring
+                Stage_2.move_velocity(-600);
                 }
                  intake.move(127);
              if (tossing == false ){
-                Stage_3.move(-127);// middle goal scoring
-                Stage_2.move(-127);
+                Stage_3.move_velocity(-600);// middle goal scoring
+                Stage_2.move_velocity(-600);
             }
                 intake_spinning = true;
                 Stage_3stopped = false;
-                     is_middle  =false;
+                  
         } 
         else {  // No buttons pressed
             if (!Stage_3stopped) {
@@ -375,7 +361,7 @@ void opcontrol() {
 
          if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
             
-           autonomous();
+          autonomous();
              
         }
          if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){
@@ -385,17 +371,20 @@ void opcontrol() {
              
         }
         // === Pneumatic F toggle (L1) ===
-     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)){
-                load_1.set_value(loaded_1);
-                loaded_1 = !loaded_1;  
+     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
+                doinker.set_value(false);
+     }
+              
+    else {
+             doinker.set_value(true);
+               
         }
 
-     if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_Y)){
-             doinker.set_value(false); 
+     if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_L1)){
+             load_1.set_value(doinked); 
+             doinked= !doinked;
         }
-    else {
-        doinker.set_value(true);
-        }
+ 
         //doink code done
        
 

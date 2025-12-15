@@ -7,66 +7,55 @@
 #include "pros/distance.hpp"
 #include "pros/gps.hpp"
 #include "pros/motors.hpp"
-#include "main.h"   
 #include "lemlib/api.hpp" // IWYU pragma: keep
-#include "lemlib/chassis/trackingWheel.hpp"
-#include "pros/abstract_motor.hpp"
 #include "pros/optical.hpp"
 #include "pros/rotation.hpp"
-float apply_deadzone(float value, int factor);
-extern void pidtesting();
 extern pros::Controller controller;
 
+extern lemlib:: Chassis chassis;
+
+// motor groups
 extern pros::MotorGroup leftMotors;
 extern pros::MotorGroup rightMotors;
 extern pros::Motor Stage_3;
 extern pros::Motor Stage_2;
 extern pros:: Motor hook;
 extern pros::Motor intake;
-extern pros:: Rotation odomy;
 extern pros:: Motor hooks;
 extern pros:: Optical optical;
 
+//inertial
 extern pros::Imu inertial;
-extern pros::Imu drivetrain_inertial;
 
+//pistors
 extern pros::adi :: DigitalOut outpist;
 extern pros::adi ::DigitalOut load_1;
 extern pros::adi ::DigitalOut doinker;
-extern pros::Rotation rotate;
+
+//distance sensor
 extern pros::Distance frontdist;
 extern pros::Distance leftdist;
 extern pros::Distance rightdist;
-//extern toss color
+
+//Varaibles
 extern std::string toss_color;
-extern int speed_switch;
 extern bool hooks_spinning;
-extern bool ejection;
-extern lemlib::Drivetrain drivetrain;
-extern lemlib::ControllerSettings linearController;
-extern lemlib::ControllerSettings angularController;
-extern lemlib::PID linearPID;
-extern lemlib::PID angularPID;
 extern bool intakeon;
-extern lemlib:: Chassis chassis;
 extern void print_task_fn(void* param);
-extern void ring_toss_task_fn(void* param);
 
+
+//autonomous
 extern void Auton_Skills();
-
-
-extern void Blue_Right_AWP();
+extern void Low_Goal();
 extern void Blue_Left_AWP();
+extern void soloAWP();
+extern void pidtesting();
 
 
-
-
-extern void moveToWithHeading( double endHeading, double& targetX, double& targetY);
-//extern pros:: Rotation odomy;
+//Other sensor;
 extern lemlib::TrackingWheel vertical_tracking_wheel;
 extern pros:: Rotation odomy;
 extern pros::Rotation odomx;
-extern void soloAWP();
 extern  pros:: GPS gps1;
 
 #endif
