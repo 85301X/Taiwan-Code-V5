@@ -393,10 +393,10 @@ Stage_3.move_velocity(-600);
     chassis.turnToHeading(82,900);
         chassis.waitUntilDone();
     chassis.setPose(chassis.getPose().x,rightdist.get_distance()/25.4,chassis.getPose().theta);
+pros::delay(40);
        outpist.set_value(false);
        
-    chassis.waitUntilDone();
-       
+   
      intake.move_velocity(600);
     Stage_2.move_velocity(-300);
 
@@ -405,12 +405,11 @@ Stage_3.move_velocity(-600);
 pros::delay(40); 
    load_1.set_value(true); 
      
-     chassis.waitUntilDone();
-   
+
    
     chassis.turnToHeading(217-1, 1000,{.maxSpeed = 100, .minSpeed = 50,});
     
-     chassis.waitUntilDone();
+     
    
      
        chassis.moveToPoint(1,63, 900,{.forwards=false,.maxSpeed = 127, .minSpeed = 50});
@@ -420,9 +419,28 @@ pros::delay(40);
        pros::delay( 1200);
        middle_goal(200,1100);
           chassis.moveToPoint(1,63, 900,{.maxSpeed = 127, .minSpeed = 90});
-           chassis.moveToPoint(63, 37, 2000, {.maxSpeed = 127, .minSpeed = 120,.useDistSensor=1,.distanceSenseTarget=22});
+           chassis.moveToPoint(61-6, 37, 2000, {.maxSpeed = 127, .minSpeed = 120,.useDistSensor=1,.distanceSenseTarget=30});
 
     
+     load_1.set_value(true);
+     chassis.turnToHeading(180, 900,{.maxSpeed = 127, .minSpeed = 100,});
+         chassis.waitUntilDone();
+           intake.move_velocity(600);
+     Stage_2.move_velocity(-600);
+     Stage_3.move_velocity(600);
+    chassis.waitUntilDone();
+    chassis.setPose(leftdist.get_distance()/25.4,chassis.getPose().y,chassis.getPose().theta);
+      chassis.moveToPoint(20, -14.5, 1000, {.maxSpeed = 127, .minSpeed = 60,.useDistSensor=true,.distanceSenseTarget=3.5});
+   
+     pros::delay(600);
+
+  chassis.moveToPoint(19,40, 1200, {.forwards = false, .maxSpeed = 127, .minSpeed = 60,.useDistSensor=true,.distanceSenseTarget=31.5});
+      
+
+    
+    //outpist.set_value(false);
+    long_goal(2000);
+   
 
 
 }
@@ -480,8 +498,8 @@ toss_color ="NO";
    chassis.waitUntilDone();
       chassis.setPose(frontdist.get_distance()/25.4,chassis.getPose().y,chassis.getPose().theta);
  
-  
-   chassis.moveToPoint(10.9,99.5+2, 2000,{.forwards=false,.maxSpeed=120,.minSpeed=100,.useDistSensor=true,.distanceSenseTarget=10.9});
+  pros::delay(40);
+   chassis.moveToPoint(10.9,99.5+2, 2000,{.forwards=false,.maxSpeed=120,.minSpeed=110,.useDistSensor=true,.distanceSenseTarget=10.9});
      chassis.turnToHeading(0, 900);
    chassis.moveToPoint(12.5,90.5+2, 900,{.forwards=false,.maxSpeed=120,.minSpeed=100,.useDistSensor=true,.distanceSenseTarget=30});
       load_1.set_value(true);
@@ -598,3 +616,182 @@ void Auton_Skills(){
 
 
 }
+
+
+
+
+enum class Alliance {
+    RED,
+    BLUE
+};
+
+enum class AutonType {
+    SOLO_AWP,
+    HIGH_GOAL,
+    LOW_GOAL
+};
+
+/*
+Alliance selectedAlliance = Alliance::RED;
+AutonType selectedAuton   = AutonType::SOLO_AWP;
+bool autonConfirmed = false;
+
+
+
+void drawAllianceScreen() {
+    pros::screen::erase();
+
+    switch (selectedAlliance) {
+        case Alliance::RED:
+           pros::screen::set_pen(pros::Color::red);
+    pros::screen::fill_rect(5,5,480,480);
+            break;
+        case Alliance::BLUE:
+              pros::screen::set_pen(pros::Color::blue);
+      pros::screen::fill_rect(5,5,480,480);
+            break;
+    }
+
+    pros::screen::set_pen(pros::Color::white);
+    pros::screen::print(pros::E_TEXT_LARGE, 120, 30, "SELECT ALLIANCE");
+
+    pros::screen::print(
+        pros::E_TEXT_LARGE,
+        180,
+        100,
+        selectedAlliance == Alliance::RED ? "RED" : "BLUE"
+    );
+
+    pros::screen::print(pros::E_TEXT_SMALL, 120, 180, "LEFT: Toggle   A: Confirm");
+}
+
+void drawAutonScreen() {
+    pros::screen::erase();
+
+  
+    switch (selectedAlliance) {
+        case Alliance::RED:
+           pros::screen::set_pen(pros::Color::red);
+    pros::screen::fill_rect(5,5,480,480);
+            break;
+        case Alliance::BLUE:
+              pros::screen::set_pen(pros::Color::blue);
+      pros::screen::fill_rect(5,5,480,480);
+            break;
+    }
+
+      pros::screen::set_pen(pros::Color::white);
+
+    pros::screen::print(pros::E_TEXT_LARGE, 140, 30, "SELECT AUTON");
+
+    const char* autonName;
+
+    switch (selectedAuton) {
+        case AutonType::SOLO_AWP:
+            autonName = "SOLO AWP";
+            break;
+        case AutonType::HIGH_GOAL:
+            autonName = "HIGH GOAL";
+            break;
+        case AutonType::LOW_GOAL:
+            autonName = "LOW GOAL";
+            break;
+    }
+
+    pros::screen::print(pros::E_TEXT_LARGE, 160, 100, autonName);
+    pros::screen::print(pros::E_TEXT_SMALL, 120, 180, "LEFT: Cycle   A: Confirm");
+}
+
+void drawConfirmedScreen() {
+    pros::screen::erase();
+     switch (selectedAlliance) {
+        case Alliance::RED:
+           pros::screen::set_pen(pros::Color::red);
+    pros::screen::fill_rect(5,5,480,480);
+            break;
+        case Alliance::BLUE:
+              pros::screen::set_pen(pros::Color::blue);
+      pros::screen::fill_rect(5,5,480,480);
+            break;
+    }
+
+      pros::screen::set_pen(pros::Color::white);
+
+    pros::screen::print(pros::E_TEXT_LARGE, 120, 80, "AUTON LOCKED");
+
+    pros::screen::print(
+        pros::E_TEXT_MEDIUM,
+        140,
+        130,
+        selectedAlliance == Alliance::RED ? "RED" : "BLUE"
+    );
+
+    const char* autonName;
+
+    switch (selectedAuton) {
+        case AutonType::SOLO_AWP:  autonName = "SOLO AWP";  break;
+        case AutonType::HIGH_GOAL: autonName = "HIGH GOAL"; break;
+        case AutonType::LOW_GOAL:  autonName = "LOW GOAL";  break;
+    }
+
+    pros::screen::print(pros::E_TEXT_MEDIUM, 140, 160, autonName);
+}
+
+
+
+void autonSelector() {
+    enum class MenuState {
+        SELECT_ALLIANCE,
+        SELECT_AUTON,
+        CONFIRMED
+    };
+
+    MenuState state = MenuState::SELECT_ALLIANCE;
+
+    drawAllianceScreen();
+
+    while (!autonConfirmed && pros::competition::is_disabled()) {
+
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)) {
+            switch (state) {
+
+                case MenuState::SELECT_ALLIANCE:
+                    selectedAlliance =
+                        (selectedAlliance == Alliance::RED) ? Alliance::BLUE : Alliance::RED;
+                    drawAllianceScreen();
+                    break;
+
+                case MenuState::SELECT_AUTON:
+                    selectedAuton =
+                        static_cast<AutonType>((static_cast<int>(selectedAuton) + 1) % 3);
+                    drawAutonScreen();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)) {
+            switch (state) {
+
+                case MenuState::SELECT_ALLIANCE:
+                    state = MenuState::SELECT_AUTON;
+                    drawAutonScreen();
+                    break;
+
+                case MenuState::SELECT_AUTON:
+                    autonConfirmed = true;
+                    state = MenuState::CONFIRMED;
+                    drawConfirmedScreen();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        pros::delay(20);
+    }
+}
+*/

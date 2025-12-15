@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "Auton",
+    "project_name": "driver skills",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -635,8 +635,8 @@
       }
     },
     "upload_options": {
-      "slot": 1,
-      "icon": "pizza"
+      "slot": 8,
+      "icon": "X"
     },
     "use_early_access": false
   }

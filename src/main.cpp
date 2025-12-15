@@ -16,7 +16,8 @@
 #include <string>
 #include "global.h"
 #include <iostream>
-
+#include "AutonSelector.cpp"
+#include "pros/screen.hpp"
 /**
  * Runs initialization code. This occurs as soon as the program is started.
  *
@@ -35,10 +36,12 @@ void initialize() {
     optical.set_integration_time(5);
     optical.set_led_pwm(70);
     odomx.set_reversed(true);
+    
+ //  autonSelector();
    
         }
 
-/**
+/**t
  * Runs while the robot is disabled
  */
 void disabled() {
@@ -76,7 +79,7 @@ void competition_initialize() {
 void autonomous() {
     
   
-soloAWP();
+Auton_Skills();
 }
 
 /**
@@ -163,15 +166,7 @@ void color_sort() {
     Stage_3.move_velocity(0);
     Stage_2.move_velocity(0);
 
-    if (is_middle){
-          outpist.set_value(true);
- Stage_3.move_velocity(600);
-    Stage_2.move_velocity(-600);
-    pros::delay(300);
-     outpist.set_value(false);
-           
-    }
-    else if (outpisting == true ) {
+   if (outpisting == true ) {
     
     
     // Reverse to eject incorrect triball
@@ -231,7 +226,7 @@ void print_task_fn(void *param){
      
 //        controller.print(1, 0, "in: %.0f ,y: %.0f,,x:%.0f c:%s",  inertial.get_heading(),chassis.getPose().y,chassis.getPose().x,toss_color);
 
- controller.print(1, 0, "%.0f,%.0f,%.0f,%.0f,%.0f,%.0lf,%.0f,%.0lf       ", frontdist.get_distance()/ 25.4,leftdist.get_distance()/ 25.4,rightdist.get_distance()/ 25.4,chassis.getPose().x,chassis.getPose().y,inertial.get_heading(),gps1.get_position_x()/25.4,gps1.get_position_y()/25.4);
+ controller.print(1, 0, "%.0f,%.0f,%.0f,%.0f,%.0f,%.0lf,%.0f,%.0lf       ", frontdist.get_distance()/ 25.4,leftdist.get_distance()/ 25.4,rightdist.get_distance()/ 25.4,chassis.getPose().x,chassis.getPose().y,inertial.get_heading());
  // pros::lcd::print(5,  "f l %s r %s", toss_color);
         pros::delay(100);
  
@@ -253,7 +248,7 @@ void opcontrol() {
    // pros::Task antijam_task(antijam_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
     //use print task to print imu heading and position
    
-    pros::Task print_task(print_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
+   pros::Task print_task(print_task_fn, (void*)"PROS", TASK_PRIORITY_DEFAULT);
      
     Stage_3.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
     leftMotors.set_brake_mode(pros::E_MOTOR_BRAKE_BRAKE);
@@ -261,7 +256,7 @@ void opcontrol() {
 
     // controller
     // loop to continuously update motors
-    while (controlling ==true) {
+    while (true) {
         // get joystick positions
    
         int raw_forward = controller.get_analog(pros::E_CONTROLLER_ANALOG_LEFT_Y);
@@ -314,36 +309,42 @@ void opcontrol() {
         else if (controller.get_digital(pros::E_CONTROLLER_DIGITAL_L2)) { // cahnged
                  outpist.set_value(false);
                     outpisting = false;
-                    is_middle  =true;
+                    is_middle  = true;
                 if( Stage_3stopped == true)
                 {
-                      Stage_3.move(-127);
-                      Stage_2.move(-127);
-                      pros::delay(200);
-                      Stage_3.move_velocity(-600);// middle goal scoring
-                Stage_2.move_velocity(-600);
+                    intake.move(-127);
+                    Stage_3.move(-127);
+                    Stage_2.move(127);
+                    pros::delay(200);
+                    Stage_2.move(-127);
+                    Stage_3stopped = false;
+                    intake_spinning = true;
+
+        
                 }
-                 intake.move(127);
-             if (tossing == false ){
-                Stage_3.move_velocity(-600);// middle goal scoring
-                Stage_2.move_velocity(-600);
-            }
-                intake_spinning = true;
-                Stage_3stopped = false;
+                else {
+
+                    intake.move(127);
+                    Stage_2.move(-127);
+                    Stage_3.move(-127);
+        
+                }
+            Stage_3stopped = false;
+                }
+            //}
+              //  intake_spinning = true;
+                //Stage_3stopped = false;
                   
-        } 
+        
+    
         else {  // No buttons pressed
-            if (!Stage_3stopped) {
-                Stage_3.move_velocity(0);
-                Stage_2.move_velocity(0);
-                Stage_3stopped = true;
-            }
-            if (intake_spinning) {
-                 intake.move(-0);
-                intake_spinning = false;
-            }
+            intake.move(0);
             outpist.set_value(false);
-               outpisting = false;
+            Stage_2.move(0);
+            Stage_3.move(0);
+            Stage_3stopped = true;
+            intake_spinning = false;
+            
         }
         //========================================================================================================
         if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_B)){
@@ -361,7 +362,7 @@ void opcontrol() {
 
          if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_LEFT)){
             
-          autonomous();
+    autonomous();
              
         }
          if (controller.get_digital_new_press(pros::E_CONTROLLER_DIGITAL_A)){

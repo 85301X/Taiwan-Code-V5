@@ -50,6 +50,7 @@ extern void Low_Goal();
 extern void Blue_Left_AWP();
 extern void soloAWP();
 extern void pidtesting();
+extern void autonSelector();
 
 
 //Other sensor;
