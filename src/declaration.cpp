@@ -1,6 +1,5 @@
 #include "lemlib/chassis/chassis.hpp"
 #include "lemlib/chassis/trackingWheel.hpp"
-#include "main.h"
 #include "lemlib/api.hpp" // IWYU pragma: keep
 #include "global.h"
 #include "pros/adi.hpp"
@@ -20,12 +19,12 @@ pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right moto
 
 
 pros:: Motor intake(1 ,pros::MotorGearset::blue);
-pros:: Motor Stage_3({2 },pros::MotorGearset::blue);
-pros:: Motor Stage_2({3 },pros::MotorGearset::blue);
+pros:: Motor Stage_3(2 ,pros::MotorGearset::blue);
+pros:: Motor Stage_2(3 ,pros::MotorGearset::blue);
 
 
 // Inertial Sensor on port 10
-pros::Imu inertial(4); // 19 -> 8 because we're using new inertial sensor now
+pros::Imu inertial(5); // 19 -> 8 because we're using new inertial sensor now
 
 
 pros::Optical optical(10);
@@ -34,7 +33,8 @@ pros::Gps gps1(9);
 pros:: adi :: DigitalOut outpist('G');
 pros:: adi :: DigitalOut load_1('H',false);
 pros:: adi :: DigitalOut doinker('F');
- 
+ pros:: adi :: DigitalOut park('E');
+
 // tracking wheels
 // horizontal tracking wheel encoder. Rotation sensor, port 20, not reversed
 
@@ -84,12 +84,14 @@ lemlib::ControllerSettings angularController(7.9, // proportional gain (kP)
 pros::Distance frontdist(18);
 pros::Distance leftdist(19);
 pros::Distance rightdist(15);
+pros::Distance parkdist(9);
 // vertical tracking wheel
 lemlib::TrackingWheel vertical_tracking_wheel(&odomy, lemlib::Omniwheel::NEW_2, -0.0);
 lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,0.05); // -0.05 -> 0
 // sensors for odometry
 
-lemlib::OdomSensors sensors(&vertical_tracking_wheel, // vertical tracking wheel
+lemlib::OdomSensors sensors(
+                          nullptr, // vertical tracking wheel
                             nullptr, // vertical tracking wheel 2, set to nullptr as we don't have a second one
                             &horizontal_tracking_wheel, // horizontal tracking wheel
                             nullptr, // horizontal tracking wheel 2, set to nullptr as we don't have a second one
@@ -106,24 +108,10 @@ lemlib:: ExpoDriveCurve throttle(
 lemlib:: ExpoDriveCurve steer(
 5,
 5,
-1.008
-
-);
-/*
-lemlib:: ExpoDriveCurve throttle(
-5,
-60,
-1.008
+1.019
 
 );
 
-lemlib:: ExpoDriveCurve steer(
-5,
-30,
-1.008
-
-);
-*/
 
 // create the chassis
 lemlib::Chassis chassis(drivetrain, linearController, angularController, sensors,  &throttle,&steer);

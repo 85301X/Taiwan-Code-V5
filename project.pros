@@ -1,7 +1,7 @@
 {
   "py/object": "pros.conductor.project.Project",
   "py/state": {
-    "project_name": "driver skills",
+    "project_name": "Solo AWP Red",
     "target": "v5",
     "templates": {
       "LemLib": {
@@ -635,7 +635,7 @@
       }
     },
     "upload_options": {
-      "slot": 8,
+      "slot": 1,
       "icon": "X"
     },
     "use_early_access": false
