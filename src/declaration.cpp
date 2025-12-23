@@ -6,6 +6,7 @@
 #include "pros/gps.hpp"
 #include "pros/motors.hpp"
 #include "pros/optical.hpp"
+#include "pros/rotation.hpp"
 
 
 // controller
@@ -14,25 +15,24 @@ bool intakeon = false;
 // motor groups
 pros::MotorGroup leftMotors({-11 , -12,-13},
                             pros::MotorGearset::blue); // left motor group - ports 3 (reversed), 4, 5 (reversed)
-pros::MotorGroup rightMotors({6, 7, 8}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
+pros::MotorGroup rightMotors({18, 19, 20}, pros::MotorGearset::blue); // right motor group - ports 6, 7, 9 (reversed)
 
 
 
-pros:: Motor intake(1 ,pros::MotorGearset::blue);
-pros:: Motor Stage_3(2 ,pros::MotorGearset::blue);
-pros:: Motor Stage_2(3 ,pros::MotorGearset::blue);
+pros:: Motor intake(9 ,pros::MotorGearset::blue);
+pros:: Motor Stage_3(10 ,pros::MotorGearset::blue);
+pros:: Motor Stage_2(1 ,pros::MotorGearset::blue);
 
 
 // Inertial Sensor on port 10
-pros::Imu inertial(5); // 19 -> 8 because we're using new inertial sensor now
+pros::Imu inertial(15); // 19 -> 8 because we're using new inertial sensor now
 
 
-pros::Optical optical(10);
+pros::Optical optical(4);
 
-pros::Gps gps1(9);
-pros:: adi :: DigitalOut outpist('G');
-pros:: adi :: DigitalOut load_1('H',false);
-pros:: adi :: DigitalOut doinker('F');
+pros:: adi :: DigitalOut outpist('A');
+pros:: adi :: DigitalOut load_1('B',false);
+pros:: adi :: DigitalOut doinker('C');
  pros:: adi :: DigitalOut park('E');
 
 // tracking wheels
@@ -40,11 +40,11 @@ pros:: adi :: DigitalOut doinker('F');
 
 
 // vertical tracking wheel encoder. Rotation sensor, port 11, reversed
-pros::Rotation odomy(17 );
 
 
 
-pros::Rotation odomx(16);
+pros::Rotation odomx(14);
+pros::Rotation odomy(16);
 // drivetrain settings
 lemlib::Drivetrain drivetrain(&leftMotors, // left motor group
                               &rightMotors, // right motor group
@@ -81,10 +81,10 @@ lemlib::ControllerSettings angularController(7.9, // proportional gain (kP)
 // horizontal tracking wheel encode
 // vertical tracking wheel encoder
 // horizontal tracking wheel
-pros::Distance frontdist(18);
-pros::Distance leftdist(19);
-pros::Distance rightdist(15);
-pros::Distance parkdist(9);
+pros::Distance frontdist(3);
+pros::Distance leftdist(2);
+pros::Distance rightdist(8);
+pros::Distance parkdist(5);
 // vertical tracking wheel
 lemlib::TrackingWheel vertical_tracking_wheel(&odomy, lemlib::Omniwheel::NEW_2, -0.0);
 lemlib::TrackingWheel horizontal_tracking_wheel(&odomx,lemlib::Omniwheel::NEW_2,0.05); // -0.05 -> 0
